@@ -21,7 +21,7 @@ inputs:
     description: >
       Comma-separated list of repositories in owner/repo format.
       If not set, all repositories belonging to the authenticated user are synced.
-      Example: 'owner/repo1,owner/repo2' or '${{ github.repository }}'
+      Example: 'owner/repo1,owner/repo2'
     required: false
 
   source_owner:
