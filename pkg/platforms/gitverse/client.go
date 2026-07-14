@@ -37,6 +37,9 @@ func (c *Client) Configure(token string, apiURL string, webURL string, owner str
 	c.api = apiclient.New(strings.TrimSuffix(apiURL, "/"), token, apiclient.Config{
 		AuthHeader: "Authorization",
 		AuthPrefix: "Bearer ",
+		ExtraHeaders: map[string]string{
+			"Accept": "application/vnd.gitverse.object+json; version=1",
+		},
 	})
 	c.webURL = webURL
 	c.owner = owner
@@ -214,6 +217,9 @@ func (c *Client) RepositoryExists(ctx context.Context, owner, repo string) (bool
 }
 
 func (c *Client) CloneURL(repo models.Repository) string {
+	if c.owner != "" {
+		return fmt.Sprintf("%s/%s/%s.git", c.webURL, c.owner, repo.Name)
+	}
 	return fmt.Sprintf("%s/%s.git", c.webURL, repo.FullName)
 }
 

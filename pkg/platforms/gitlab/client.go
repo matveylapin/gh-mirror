@@ -216,6 +216,9 @@ func (c *Client) RepositoryExists(ctx context.Context, owner, repo string) (bool
 }
 
 func (c *Client) CloneURL(repo models.Repository) string {
+	if c.owner != "" {
+		return fmt.Sprintf("%s/%s/%s.git", c.webURL, c.owner, repo.Name)
+	}
 	return fmt.Sprintf("%s/%s.git", c.webURL, repo.FullName)
 }
 

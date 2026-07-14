@@ -18,8 +18,9 @@ const (
 )
 
 type Config struct {
-	AuthHeader string
-	AuthPrefix string
+	AuthHeader   string
+	AuthPrefix   string
+	ExtraHeaders map[string]string
 }
 
 type Client struct {
@@ -84,6 +85,9 @@ func (c *Client) DoRequest(ctx context.Context, method, path string, body interf
 			req.Header.Set(c.cfg.AuthHeader, authValue)
 		}
 		req.Header.Set("Content-Type", "application/json")
+		for key, value := range c.cfg.ExtraHeaders {
+			req.Header.Set(key, value)
+		}
 
 		resp, err := c.httpClient.Do(req.WithContext(ctx))
 		if err != nil {

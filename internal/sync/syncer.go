@@ -225,13 +225,10 @@ func (s *Syncer) syncRepository(ctx context.Context, srcRepo models.Repository, 
 
 		destRefs, err := s.getRemoteRefs(srcRepo, s.creds[dest.ID()].Token, dest)
 		if err != nil {
-			return models.SyncResult{
-				RepoName:    srcRepo.Name,
-				Destination: dest.ID(),
-				Action:      action,
-				Error:       err,
-				Message:     "failed to get destination refs",
-			}
+			// Destination repo exists but may be empty (no branches/tags yet).
+			// Treat as empty refs and proceed with push.
+			s.logger.Warn("failed to get destination refs, treating as empty", "name", srcRepo.Name, "error", err)
+			destRefs = make(map[string]string)
 		}
 
 		inSync, reason := compareRefs(sourceRefs, destRefs)
