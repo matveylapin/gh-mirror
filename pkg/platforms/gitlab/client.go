@@ -14,8 +14,9 @@ import (
 const PlatformID = models.PlatformID("gitlab")
 
 type Client struct {
-	api *apiclient.Client
+	api    *apiclient.Client
 	webURL string
+	owner  string
 }
 
 func init() {
@@ -32,12 +33,13 @@ func (c *Client) Name() string {
 	return "GitLab"
 }
 
-func (c *Client) Configure(token string, apiURL string, webURL string) error {
+func (c *Client) Configure(token string, apiURL string, webURL string, owner string) error {
 	c.api = apiclient.New(strings.TrimSuffix(apiURL, "/"), token, apiclient.Config{
 		AuthHeader: "PRIVATE-TOKEN",
 		AuthPrefix: "",
 	})
 	c.webURL = webURL
+	c.owner = owner
 	return nil
 }
 

@@ -18,9 +18,10 @@ import (
 const PlatformID = models.PlatformID("github")
 
 type Client struct {
-	token    string
-	webURL   string
-	client   *github.Client
+	token  string
+	webURL string
+	owner  string
+	client *github.Client
 }
 
 func init() {
@@ -37,12 +38,13 @@ func (c *Client) Name() string {
 	return "GitHub"
 }
 
-func (c *Client) Configure(token string, apiURL string, webURL string) error {
+func (c *Client) Configure(token string, apiURL string, webURL string, owner string) error {
 	if webURL == "" {
 		return fmt.Errorf("web URL is required")
 	}
 	c.token = token
 	c.webURL = webURL
+	c.owner = owner
 
 	httpClient := &http.Client{Timeout: 60 * time.Second}
 
@@ -70,6 +72,53 @@ func (c *Client) GetAuthenticatedUser(ctx context.Context) (string, error) {
 }
 
 func (c *Client) ListRepositories(ctx context.Context) ([]models.Repository, error) {
+	if c.owner != "" {
+		return c.listOrgRepositories(ctx)
+	}
+	return c.listUserRepositories(ctx)
+}
+
+func (c *Client) listOrgRepositories(ctx context.Context) ([]models.Repository, error) {
+	var allRepos []models.Repository
+	page := 1
+	perPage := 100
+
+	for {
+		repos, resp, err := c.client.Repositories.ListByOrg(ctx, c.owner, &github.RepositoryListByOrgOptions{
+			Sort:        "updated",
+			Direction:   "desc",
+			ListOptions: github.ListOptions{
+				Page:    page,
+				PerPage: perPage,
+			},
+		})
+		if err != nil {
+			return nil, fmt.Errorf("list org repositories: %w", err)
+		}
+
+		for _, r := range repos {
+			allRepos = append(allRepos, models.Repository{
+				PlatformID:    PlatformID,
+				Name:          r.GetName(),
+				FullName:      r.GetFullName(),
+				Description:   r.GetDescription(),
+				Private:       r.GetPrivate(),
+				HTMLURL:       r.GetHTMLURL(),
+				DefaultBranch: r.GetDefaultBranch(),
+				UpdatedAt:     r.GetUpdatedAt().String(),
+			})
+		}
+
+		if resp.NextPage == 0 {
+			break
+		}
+		page = resp.NextPage
+	}
+
+	return allRepos, nil
+}
+
+func (c *Client) listUserRepositories(ctx context.Context) ([]models.Repository, error) {
 	var allRepos []models.Repository
 	page := 1
 	perPage := 100

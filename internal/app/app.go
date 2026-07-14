@@ -69,7 +69,7 @@ func createSourceAndDests(cfg *config.Config) (platform.Platform, []platform.Pla
 	if err != nil {
 		return nil, nil, fmt.Errorf("create source platform: %w", err)
 	}
-	if err := source.Configure(cfg.Platforms[cfg.Source].Token, cfg.Platforms[cfg.Source].APIURL, cfg.Platforms[cfg.Source].URL); err != nil {
+	if err := source.Configure(cfg.Platforms[cfg.Source].Token, cfg.Platforms[cfg.Source].APIURL, cfg.Platforms[cfg.Source].URL, cfg.Platforms[cfg.Source].Owner); err != nil {
 		return nil, nil, fmt.Errorf("configure source platform: %w", err)
 	}
 
@@ -80,7 +80,7 @@ func createSourceAndDests(cfg *config.Config) (platform.Platform, []platform.Pla
 			return nil, nil, fmt.Errorf("create destination platform %s: %w", destID, err)
 		}
 		destCfg := cfg.Platforms[destID]
-		if err := dest.Configure(destCfg.Token, destCfg.APIURL, destCfg.URL); err != nil {
+		if err := dest.Configure(destCfg.Token, destCfg.APIURL, destCfg.URL, destCfg.Owner); err != nil {
 			return nil, nil, fmt.Errorf("configure destination platform %s: %w", destID, err)
 		}
 		destinations = append(destinations, dest)
@@ -96,6 +96,7 @@ func buildCredentials(cfg *config.Config) sync.Credentials {
 			Token:  pc.Token,
 			APIURL: pc.APIURL,
 			URL:    pc.URL,
+			Owner:  pc.Owner,
 		}
 	}
 	return creds

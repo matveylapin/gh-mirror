@@ -14,7 +14,7 @@ import (
 type MockPlatform struct {
 	idFunc               func() models.PlatformID
 	nameFunc             func() string
-	configureFunc        func(token, apiURL, webURL string) error
+	configureFunc        func(token, apiURL, webURL, owner string) error
 	getAuthUserFunc      func(ctx context.Context) (string, error)
 	listReposFunc        func(ctx context.Context) ([]models.Repository, error)
 	getRepoFunc          func(ctx context.Context, owner, repo string) (*models.Repository, error)
@@ -27,7 +27,7 @@ type MockPlatform struct {
 
 func (m *MockPlatform) ID() models.PlatformID                                     { return m.idFunc() }
 func (m *MockPlatform) Name() string                                              { return m.nameFunc() }
-func (m *MockPlatform) Configure(token, apiURL, webURL string) error             { return m.configureFunc(token, apiURL, webURL) }
+func (m *MockPlatform) Configure(token, apiURL, webURL, owner string) error { return m.configureFunc(token, apiURL, webURL, owner) }
 func (m *MockPlatform) GetAuthenticatedUser(ctx context.Context) (string, error)  { return m.getAuthUserFunc(ctx) }
 func (m *MockPlatform) ListRepositories(ctx context.Context) ([]models.Repository, error) {
 	return m.listReposFunc(ctx)
@@ -51,7 +51,7 @@ func newSourceMock() *MockPlatform {
 	return &MockPlatform{
 		idFunc:            func() models.PlatformID { return "github" },
 		nameFunc:          func() string { return "GitHub" },
-		configureFunc:     func(_, _, _ string) error { return nil },
+		configureFunc:     func(_, _, _, _ string) error { return nil },
 		getAuthUserFunc:   func(_ context.Context) (string, error) { return "srcuser", nil },
 		listReposFunc:     func(_ context.Context) ([]models.Repository, error) { return nil, nil },
 		getRepoFunc:       func(_ context.Context, _, _ string) (*models.Repository, error) { return nil, nil },
@@ -67,7 +67,7 @@ func newDestMock(id models.PlatformID) *MockPlatform {
 	return &MockPlatform{
 		idFunc:            func() models.PlatformID { return id },
 		nameFunc:          func() string { return string(id) },
-		configureFunc:     func(_, _, _ string) error { return nil },
+		configureFunc:     func(_, _, _, _ string) error { return nil },
 		getAuthUserFunc:   func(_ context.Context) (string, error) { return "destuser", nil },
 		listReposFunc:     func(_ context.Context) ([]models.Repository, error) { return nil, nil },
 		getRepoFunc:       func(_ context.Context, _, _ string) (*models.Repository, error) { return nil, nil },

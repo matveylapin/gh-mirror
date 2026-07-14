@@ -24,6 +24,7 @@ type PlatformConfig struct {
 	Token  string `yaml:"token"`
 	APIURL string `yaml:"api_url"`
 	URL    string `yaml:"url"`
+	Owner  string `yaml:"owner"`
 }
 
 // SyncConfig controls sync behavior.

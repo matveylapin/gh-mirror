@@ -210,7 +210,7 @@ func TestCleanPullRefs(t *testing.T) {
 
 func TestConfigure(t *testing.T) {
 	client := &Client{}
-	err := client.Configure("token", "https://codeberg.org/api/v1", "https://codeberg.org")
+	err := client.Configure("token", "https://codeberg.org/api/v1", "https://codeberg.org", "")
 	be.Equal(t, err, nil)
 	be.True(t, client.api != nil)
 }

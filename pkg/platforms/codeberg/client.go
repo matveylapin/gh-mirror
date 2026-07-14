@@ -14,8 +14,9 @@ import (
 const PlatformID = models.PlatformID("codeberg")
 
 type Client struct {
-	api   *apiclient.Client
+	api    *apiclient.Client
 	webURL string
+	owner  string
 }
 
 func init() {
@@ -32,12 +33,13 @@ func (c *Client) Name() string {
 	return "Codeberg"
 }
 
-func (c *Client) Configure(token string, apiURL string, webURL string) error {
+func (c *Client) Configure(token string, apiURL string, webURL string, owner string) error {
 	c.api = apiclient.New(strings.TrimSuffix(apiURL, "/"), token, apiclient.Config{
 		AuthHeader: "Authorization",
 		AuthPrefix: "token ",
 	})
 	c.webURL = strings.TrimSuffix(webURL, "/")
+	c.owner = owner
 	return nil
 }
 

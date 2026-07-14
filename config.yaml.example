@@ -2,10 +2,12 @@ platforms:
   github:
     token: "${GITHUB_TOKEN}"
     url: "https://github.com"
+    # owner: "my-org"  # optional: GitHub organization or user that owns the repos
   gitverse:
     token: "${GITVERSE_TOKEN}"
     api_url: "https://api.gitverse.ru"
     url: "https://gitverse.ru"
+    # owner: "my-org"  # optional: GitVerse organization to create repos under
   gitlab:
     token: "${GITLAB_TOKEN}"
     api_url: "https://gitlab.com/api/v4"

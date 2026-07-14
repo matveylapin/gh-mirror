@@ -235,7 +235,7 @@ func TestConfigure(t *testing.T) {
 	for _, tc := range GHConfigureTestCases() {
 		t.Run(tc.Name, func(t *testing.T) {
 			client := &Client{}
-			err := client.Configure(tc.Token, tc.APIURL, tc.WebURL)
+			err := client.Configure(tc.Token, tc.APIURL, tc.WebURL, "")
 
 			if tc.WantErr {
 				be.True(t, err != nil)
@@ -250,7 +250,7 @@ func TestConfigure(t *testing.T) {
 
 func TestConfigureRequiresWebURL(t *testing.T) {
 	client := &Client{}
-	err := client.Configure("token", "", "")
+	err := client.Configure("token", "", "", "")
 	be.True(t, err != nil)
 }
 
@@ -360,7 +360,7 @@ func BenchmarkConfigure(b *testing.B) {
 	client := &Client{}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		client.Configure("token", "https://api.github.com", "https://github.com")
+		client.Configure("token", "https://api.github.com", "https://github.com", "")
 	}
 }
 

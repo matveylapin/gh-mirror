@@ -15,7 +15,7 @@ type testPlatform struct {
 
 func (t *testPlatform) ID() models.PlatformID                                                    { return t.id }
 func (t *testPlatform) Name() string                                                              { return "test" }
-func (t *testPlatform) Configure(token string, apiURL string, webURL string) error                { return nil }
+func (t *testPlatform) Configure(token string, apiURL string, webURL string, owner string) error                { return nil }
 func (t *testPlatform) GetAuthenticatedUser(ctx context.Context) (string, error)                  { return "", nil }
 func (t *testPlatform) ListRepositories(ctx context.Context) ([]models.Repository, error)         { return nil, nil }
 func (t *testPlatform) GetRepository(ctx context.Context, owner string, repo string) (*models.Repository, error) { return nil, nil }

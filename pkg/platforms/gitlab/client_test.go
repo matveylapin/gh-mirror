@@ -222,7 +222,7 @@ func TestCleanPullRefs(t *testing.T) {
 
 func TestConfigure(t *testing.T) {
 	client := &Client{}
-	err := client.Configure("token", "https://gitlab.com/api/v4", "https://gitlab.com")
+	err := client.Configure("token", "https://gitlab.com/api/v4", "https://gitlab.com", "")
 	be.Equal(t, err, nil)
 	be.True(t, client.api != nil)
 }

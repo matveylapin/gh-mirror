@@ -14,8 +14,9 @@ import (
 const PlatformID = models.PlatformID("gitverse")
 
 type Client struct {
-	api   *apiclient.Client
+	api    *apiclient.Client
 	webURL string
+	owner  string
 }
 
 func init() {
@@ -32,12 +33,13 @@ func (c *Client) Name() string {
 	return "GitVerse"
 }
 
-func (c *Client) Configure(token string, apiURL string, webURL string) error {
+func (c *Client) Configure(token string, apiURL string, webURL string, owner string) error {
 	c.api = apiclient.New(strings.TrimSuffix(apiURL, "/"), token, apiclient.Config{
 		AuthHeader: "Authorization",
 		AuthPrefix: "Bearer ",
 	})
 	c.webURL = webURL
+	c.owner = owner
 	return nil
 }
 
@@ -62,8 +64,13 @@ func (c *Client) ListRepositories(ctx context.Context) ([]models.Repository, err
 	page := 1
 	perPage := 50
 
+	basePath := "/user/repos"
+	if c.owner != "" {
+		basePath = fmt.Sprintf("/orgs/%s/repos", c.owner)
+	}
+
 	for {
-		path := fmt.Sprintf("/user/repos?page=%d&per_page=%d", page, perPage)
+		path := fmt.Sprintf("%s?page=%d&per_page=%d", basePath, page, perPage)
 		resp, err := c.api.DoRequest(ctx, "GET", path, nil)
 		if err != nil {
 			return nil, fmt.Errorf("list repositories: %w", err)
@@ -143,7 +150,12 @@ func (c *Client) CreateRepository(ctx context.Context, name string, private bool
 		Description: description,
 	}
 
-	resp, err := c.api.DoRequest(ctx, "POST", "/user/repos", reqBody)
+	createPath := "/user/repos"
+	if c.owner != "" {
+		createPath = fmt.Sprintf("/orgs/%s/repos", c.owner)
+	}
+
+	resp, err := c.api.DoRequest(ctx, "POST", createPath, reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("create repository: %w", err)
 	}

@@ -18,6 +18,7 @@ type Credential struct {
 	Token  string
 	APIURL string
 	URL    string
+	Owner  string
 }
 
 // Credentials maps platform IDs to their credentials.
@@ -82,6 +83,16 @@ func (s *Syncer) Init(ctx context.Context) error {
 	return nil
 }
 
+// effectiveOwner returns the configured owner for a platform, falling back to the
+// authenticated username. Used when calling platform API methods that accept an
+// owner parameter (GetRepository, RepositoryExists, UpdateRepository).
+func (s *Syncer) effectiveOwner(pID models.PlatformID, authUser string) string {
+	if c, ok := s.creds[pID]; ok && c.Owner != "" {
+		return c.Owner
+	}
+	return authUser
+}
+
 func (s *Syncer) destinationIDs() []models.PlatformID {
 	ids := make([]models.PlatformID, len(s.destinations))
 	for i, d := range s.destinations {
@@ -138,7 +149,8 @@ func (s *Syncer) SyncAll(ctx context.Context) ([]models.SyncResult, error) {
 
 // SyncOne mirrors a single named repository from the source platform to all destinations.
 func (s *Syncer) SyncOne(ctx context.Context, repoName string) ([]models.SyncResult, error) {
-	srcRepo, err := s.source.GetRepository(ctx, s.sourceUser, repoName)
+	sourceOwner := s.effectiveOwner(s.source.ID(), s.sourceUser)
+	srcRepo, err := s.source.GetRepository(ctx, sourceOwner, repoName)
 	if err != nil {
 		return nil, fmt.Errorf("get source repository: %w", err)
 	}
@@ -147,8 +159,9 @@ func (s *Syncer) SyncOne(ctx context.Context, repoName string) ([]models.SyncRes
 
 	for _, dest := range s.destinations {
 		destUser := s.destUsers[dest.ID()]
+		destOwner := s.effectiveOwner(dest.ID(), destUser)
 
-		exists, err := dest.RepositoryExists(ctx, destUser, repoName)
+		exists, err := dest.RepositoryExists(ctx, destOwner, repoName)
 		if err != nil {
 			results = append(results, models.SyncResult{
 				RepoName:    repoName,
@@ -162,7 +175,7 @@ func (s *Syncer) SyncOne(ctx context.Context, repoName string) ([]models.SyncRes
 
 		var destRepo models.Repository
 		if exists {
-			repo, err := dest.GetRepository(ctx, destUser, repoName)
+			repo, err := dest.GetRepository(ctx, destOwner, repoName)
 			if err != nil {
 				results = append(results, models.SyncResult{
 					RepoName:    repoName,
@@ -249,8 +262,9 @@ func (s *Syncer) syncRepository(ctx context.Context, srcRepo models.Repository, 
 		s.logger.Info("created repository", "name", srcRepo.Name, "destination", dest.ID())
 	} else {
 		destUser := s.destUsers[dest.ID()]
+		destOwner := s.effectiveOwner(dest.ID(), destUser)
 		if destRepo.Private != srcRepo.Private || destRepo.Description != srcRepo.Description {
-			if err := dest.UpdateRepository(ctx, destUser, srcRepo.Name, srcRepo.Private, srcRepo.Description); err != nil {
+			if err := dest.UpdateRepository(ctx, destOwner, srcRepo.Name, srcRepo.Private, srcRepo.Description); err != nil {
 				return models.SyncResult{
 					RepoName:    srcRepo.Name,
 					Destination: dest.ID(),
