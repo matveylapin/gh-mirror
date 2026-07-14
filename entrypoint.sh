@@ -52,11 +52,11 @@ if [ -n "${REPOS}" ]; then
   echo "Syncing repositories: ${REPOS}"
   for repo in $(echo "${REPOS}" | tr ',' ' '); do
     echo "--- Syncing ${repo} ---"
-    ./mirror sync "${repo}"
+    /app/mirror sync "${repo}"
   done
 else
   echo "Syncing all repositories..."
-  ./mirror sync
+  /app/mirror sync
 fi
 
 echo "Done."
